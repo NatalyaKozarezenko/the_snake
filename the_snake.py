@@ -1,11 +1,14 @@
 from random import choice, randint
+
 import pygame
 
 
 SCREEN_WIDTH, SCREEN_HEIGHT = 640, 480
+MIDDLE_WIDTH, MIDDLE_HEIGHT = SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2
 GRID_SIZE = 20
 GRID_WIDTH = SCREEN_WIDTH // GRID_SIZE
 GRID_HEIGHT = SCREEN_HEIGHT // GRID_SIZE
+
 
 UP = (0, -1)
 DOWN = (0, 1)
@@ -26,7 +29,6 @@ screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), 0, 32)
 pygame.display.set_caption(
     '"Змейка". Клавишами управления двигайте Змейку, она должна съесть яблоко.'
 )
-# По замечанию: остальная информация не помещается
 
 clock = pygame.time.Clock()
 
@@ -37,8 +39,8 @@ class GameObject:
     def __init__(self, color=None):
         self.body_color = color
         self.position = (
-            SCREEN_WIDTH // 2,
-            SCREEN_HEIGHT // 2
+            MIDDLE_WIDTH,
+            MIDDLE_HEIGHT
         )
 
     def draw(self):
@@ -101,7 +103,8 @@ class Snake(GameObject):
         self.reset()
         self.direction = RIGHT
         self.next_direction = None
-
+    
+    # есть замечание в телеге: отказ от next.direction
     def update_direction(self):
         """Метод обновления направления после нажатия на кнопку."""
         if self.next_direction:
@@ -145,19 +148,21 @@ class Snake(GameObject):
         self.draw_cell()
 
         for last in self.last:
-            last_rect = pygame.Rect(last, (GRID_SIZE, GRID_SIZE))
+            last_rect = pygame.Rect(
+                last, (GRID_SIZE, GRID_SIZE)
+            )
             pygame.draw.rect(screen, BOARD_BACKGROUND_COLOR, last_rect)
 
     def reset(self):
         """Cбрасывает змейку в начальное состояние."""
         self.length = 1
         self.positions = [(
-            SCREEN_WIDTH // 2,
-            SCREEN_HEIGHT // 2
+            MIDDLE_WIDTH,
+            MIDDLE_HEIGHT
         )]
         self.direction = choice([UP, DOWN, LEFT, RIGHT])
 
-
+# вот тут точно надо что-то менять
 def handle_keys(game_object):
     """Обрабатывает нажатия клавиш, для изменения направление движения
     змейки и изменения скорости.
@@ -212,7 +217,9 @@ def main():
                 snake.reset()
 
         # Проверка на столкновение с собой и с камнями:
-        if (snake.positions[0] in snake.positions[1:]
+        # срез такой, т к во второй квадрат и в трейтий никак не может врезатся
+        # (замечание из телеги)
+        if (snake.positions[0] in snake.positions[3:]
                 or snake.positions[0] in stone.positions):
             screen.fill(BOARD_BACKGROUND_COLOR)
             snake.reset()
